@@ -1,7 +1,14 @@
 package io;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.Normalizer;
 import java.util.regex.Pattern;
 
@@ -20,6 +27,10 @@ public class Main {
         System.out.println(str2);
         System.out.println(str3);
 
+        String strUrl = readOnlineResource("https://raw.githubusercontent.com/nam-long/learning-java/master/resources/cadao.txt");
+        System.out.println(strUrl);
+        //saveFileByte("D:\\text-1.txt",strUrl.getBytes());
+        saveFileByteArray("D:\\text.jpg",readbyte("http://nhandaovadoisong.com.vn/wp-content/uploads/2019/05/hinh-nen-may-tinh-thien-nhien-3d-dep-kich-thuoc-lon-10.jpg"));
     }
 
     public static String read(String fileName) throws IOException {
@@ -73,6 +84,7 @@ public class Main {
         }
         return str;
     }
+
     public static String readUTF8NumberByLine(String filename) throws IOException {
         String str = "";
         Reader reader = new FileReader(filename);
@@ -84,5 +96,74 @@ public class Main {
             i += 1;
         }
         return str;
+    }
+
+    public static String readBuffer(String filename) throws IOException {
+        String str = null;
+        byte[] buffer = new byte[10]; //[0][1][2]
+
+        InputStream is = new FileInputStream(filename);
+        BufferedInputStream bis = new BufferedInputStream(is);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        int count;
+        while ((count = bis.read(buffer)) != -1) {
+            baos.write(buffer, 0, count); // doc tu 0 -> count;
+        }
+        str = new String(baos.toByteArray());
+        baos.close();
+        is.close();
+
+        return str;
+    }
+    public static byte[] readbyte(String strUrl) throws IOException {
+        byte[] str = null;
+        URL url = new URL(strUrl);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        int responseCode = conn.getResponseCode();
+        if (responseCode == HttpsURLConnection.HTTP_OK) {
+            InputStream is = conn.getInputStream();
+            BufferedInputStream bis = new BufferedInputStream(is);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[100];
+            int count;
+            while ((count = bis.read(buffer)) != -1) {
+                baos.write(buffer, 0, count); // doc tu 0 -> count;
+            }
+            str = baos.toByteArray();
+            is.close();
+        }
+        return str;
+    }
+
+    public static String readOnlineResource(String strUrl) throws IOException {
+        String str = null;
+        URL url = new URL(strUrl);
+        HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+        int responseCode = conn.getResponseCode();
+        if (responseCode == HttpsURLConnection.HTTP_OK) {
+            InputStream is = conn.getInputStream();
+            BufferedInputStream bis = new BufferedInputStream(is);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[100];
+            int count;
+            while ((count = bis.read(buffer)) != -1) {
+                baos.write(buffer, 0, count); // doc tu 0 -> count;
+            }
+            str = new String(baos.toByteArray());
+            baos.close();
+            is.close();
+        }
+        return str;
+    }
+    public static void saveFileBuffer(String string, String filename) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter("D:/"+ filename));
+        writer.write(string);
+        writer.close();
+    }
+    public static void saveFileByteArray(String fileName, byte[] baos) throws IOException {
+        OutputStream os = new FileOutputStream(fileName);
+        os.write(baos);
+        os.close();
     }
 }
